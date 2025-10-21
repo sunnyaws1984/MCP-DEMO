@@ -20,7 +20,7 @@ These examples demonstrate how to:
 
 ## Getting Started
 
-### 1️⃣ Create Virtual Environment & Clone the Repo
+### 1 Create Virtual Environment & Clone the Repo
 ```bash
 python -m venv .venv
 source .venv/Scripts/activate   # (Windows)
