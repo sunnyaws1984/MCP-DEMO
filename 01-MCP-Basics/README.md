@@ -1,34 +1,36 @@
-Sample MCP Server Projects for DevOps & System Monitoring
+# 🧠 Sample MCP Server Projects for DevOps & System Monitoring
 
-This repository contains simple yet practical FastMCP demo projects that show how to build Model Context Protocol (MCP) servers for real-world DevOps scenarios — such as checking system metrics, Docker status, and exposing resources via MCP tools.
+This repository contains simple yet practical **FastMCP demo projects** that show how to build **Model Context Protocol (MCP) servers** for real-world DevOps and system monitoring use cases.
 
-```
-Check CPU usage and core count
-Monitor memory utilization (used, free, total)
-Verify if Docker is running on the host
-Expose system metadata as a resource
-Run as an HTTP MCP server (localhost or remote)
+---
 
-```
-FastMCP is a lightweight Python framework for building MCP servers — systems that expose tools, data, and resources to LLMs or automation frameworks using the Model Context Protoco
+## 🚀 Overview
 
-```
-# Create Virtual Env and  Clone the repo
+These examples demonstrate how to:
+
+- ✅ Check CPU usage and core count  
+- 💾 Monitor memory utilization (used, free, total)  
+- 🐳 Verify if Docker is running on the host  
+- 🧩 Expose system metadata as a resource  
+- 🌐 Run an MCP server over HTTP (localhost or remote)
+
+**FastMCP** is a lightweight Python framework for building MCP servers — systems that expose tools, data, and resources to LLMs or automation frameworks using the **Model Context Protocol**.
+
+---
+
+## Getting Started
+
+### 1️⃣ Create Virtual Environment & Clone the Repo
+```bash
 python -m venv .venv
-source .venv/Scripts/activate
+source .venv/Scripts/activate   # (Windows)
+# or
+source .venv/bin/activate       # (Linux/Mac)
 
 git clone https://github.com/yourname/MCP-DEMO.git
 cd MCP-DEMO/01-MCP-Basics
 
-# Install dependencies
 pip install fastmcp psutil
-or 
+# or
 pip install -r requirements.txt
-
-```
-
-# Tools to test MCP - MCP Inspector
-```
-npx @modelcontextprotocol/inspector
-Install Node from here : https://nodejs.org/en/download
 ```
