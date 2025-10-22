@@ -47,3 +47,9 @@ python app.py
  https://nodejs.org/en/download - Download Node from here
 
 ```
+
+### 4 Dockerie the MCP Application
+```bash
+docker build -t mcp-system .
+docker run -d -p 8080:8080 --name mcp-sysinfo mcp-system
+```
