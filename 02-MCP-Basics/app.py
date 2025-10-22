@@ -43,16 +43,19 @@ def air_quality() -> dict:
         "pm10": 60               # micrograms/m3
     }
 
-
+#  Generate the fastmcp ASGI application
 mcp_app = mcp.http_app()
+# Initialize the main FastAPI application with the correct lifespan
+# Pass the lifespan directly from mcp_app
 app = FastAPI(title="My Combined App", lifespan=mcp_app.lifespan)
+#Mount the MCP server once, at the desired path
 app.mount("/mcp-server", mcp_app)
 
 @app.get("/products")
 def get_products():
     return [{"name": "Laptop"}, {"name": "Mouse"}]
 
-
+# Use the `click` command with `uvicorn` correctly
 @click.command()
 @click.option('--host', default='0.0.0.0')
 @click.option('--port', default=9090)

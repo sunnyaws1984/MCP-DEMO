@@ -1,6 +1,7 @@
 # Weather & AQI Server with FastMCP and FastAPI
 
 This project demonstrates a simple **FastAPI** application integrated with **FastMCP** to expose multiple tools (APIs) and serve them via a unified HTTP interface. It also includes a separate FastAPI endpoint for products.
+ To ensure both the main FastAPI app and the mounted FastMCP app handle startup and shutdown events correctly, you pass the lifespan from the mcp_app to the main FastAPI instance during its creation
 
 ---
 
@@ -62,36 +63,6 @@ python app.py
   `http://<host>:<port>/mcp-server/mcp`
   eg : http://localhost:9090/mcp-server/mcp
 
-### Example Requests
-
-**Get Current Weather**
-
-```
-GET /mcp-server/tools/current_weather
-```
-
-**Get Air Quality**
-
-```
-GET /mcp-server/tools/air_quality
-```
-
-**Get Products**
-
-```
-GET /products
-```
-
-Response:
-
-```json
-[
-  {"name": "Laptop"},
-  {"name": "Mouse"}
-]
-```
-
----
 
 ## Project Structure
 
