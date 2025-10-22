@@ -1,16 +1,17 @@
 from fastapi import FastAPI
 from fastmcp import FastMCP
 from datetime import datetime
+import click
 import pytz
 import uvicorn
 
-app = FastAPI()
-server = FastMCP(name="Weather & AQI Server")
+
+mcp = FastMCP(name="Weather & AQI Server")
 
 # --------------------------------------
 # Tool 1: Current Weather + Date & Time
 # --------------------------------------
-@server.tool()
+@mcp.tool()
 def current_weather() -> dict:
     """
     Returns mock current weather and date/time for Pune.
@@ -29,7 +30,7 @@ def current_weather() -> dict:
 # --------------------------------------
 # Tool 2: Air Quality Info (mock)
 # --------------------------------------
-@server.tool()
+@mcp.tool()
 def air_quality() -> dict:
     """
     Returns mock air quality info for Pune.
@@ -42,30 +43,14 @@ def air_quality() -> dict:
         "pm10": 60               # micrograms/m3
     }
 
-# --------------------------------------
-# Mount FastMCP on FastAPI
-# --------------------------------------
-mcp_app = server.http_app() # converts your FastMCP server into an ASGI app
-app.mount("/", mcp_app)  # embeds the MCP app under /mcp in your main FastAPI app
 
-@app.get("/health")
-def health():
-    return {"message": "FastAPI + FastMCP Weather & AQI Server Running"}
+app=mcp.http_app(transport="streamable-http",stateless_http=True)
 
-@app.get("/status")
-def status():
-    """
-    Returns a simple status summary of the MCP server.
-    """
-    return {
-        "server": "FastMCP Weather & AQI Server",
-        "tools_available": ["current_weather", "air_quality"],
-        "uptime": "Server just started"  # simple placeholder, can be enhanced
-    }
-
-def main():
-    # Runs the MCP as an ASGI app
-    uvicorn.run("app:app", host="0.0.0.0", port=8080, reload=True)
+@click.command()
+@click.option('--host', default='0.0.0.0')
+@click.option('--port', default=9090)
+def main(host, port):
+    uvicorn.run(app, host=host, port=port)
 
 if __name__ == "__main__":
     main()
