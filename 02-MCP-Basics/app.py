@@ -44,7 +44,14 @@ def air_quality() -> dict:
     }
 
 
-app=mcp.http_app(transport="streamable-http",stateless_http=True)
+mcp_app = mcp.http_app()
+app = FastAPI(title="My Combined App", lifespan=mcp_app.lifespan)
+app.mount("/mcp-server", mcp_app)
+
+@app.get("/products")
+def get_products():
+    return [{"name": "Laptop"}, {"name": "Mouse"}]
+
 
 @click.command()
 @click.option('--host', default='0.0.0.0')
