@@ -1,0 +1,110 @@
+// Requires a Grafana instance running on localhost:3000,
+// with a Prometheus datasource provisioned.
+// Run with `go test -tags integration`.
+//go:build integration
+
+package tools
+
+import (
+	"context"
+	"fmt"
+	"net/url"
+	"os"
+	"testing"
+
+	"github.com/go-openapi/strfmt"
+	"github.com/grafana/grafana-openapi-client-go/client"
+	mcpgrafana "github.com/grafana/mcp-grafana"
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+)
+
+// newTestContext creates a new context with the Grafana URL and service account token
+// from the environment variables GRAFANA_URL and GRAFANA_SERVICE_ACCOUNT_TOKEN (or deprecated GRAFANA_API_KEY).
+// TODO: move this to a shared file.
+func newTestContext() context.Context {
+	cfg := client.DefaultTransportConfig()
+	cfg.Host = "localhost:3000"
+	cfg.Schemes = []string{"http"}
+	// Extract transport config from env vars, and set it on the context.
+	if u, ok := os.LookupEnv("GRAFANA_URL"); ok {
+		url, err := url.Parse(u)
+		if err != nil {
+			panic(fmt.Errorf("invalid %s: %w", "GRAFANA_URL", err))
+		}
+		cfg.Host = url.Host
+		// The Grafana client will always prefer HTTPS even if the URL is HTTP,
+		// so we need to limit the schemes to HTTP if the URL is HTTP.
+		if url.Scheme == "http" {
+			cfg.Schemes = []string{"http"}
+		}
+	}
+
+	// Check for the new service account token environment variable first
+	if apiKey := os.Getenv("GRAFANA_SERVICE_ACCOUNT_TOKEN"); apiKey != "" {
+		cfg.APIKey = apiKey
+	} else if apiKey := os.Getenv("GRAFANA_API_KEY"); apiKey != "" {
+		// Fall back to the deprecated API key environment variable
+		cfg.APIKey = apiKey
+	} else {
+		cfg.BasicAuth = url.UserPassword("admin", "admin")
+	}
+
+	client := client.NewHTTPClientWithConfig(strfmt.Default, cfg)
+
+	grafanaCfg := mcpgrafana.GrafanaConfig{
+		Debug:     true,
+		URL:       "http://localhost:3000",
+		APIKey:    cfg.APIKey,
+		BasicAuth: cfg.BasicAuth,
+	}
+
+	ctx := mcpgrafana.WithGrafanaConfig(context.Background(), grafanaCfg)
+	return mcpgrafana.WithGrafanaClient(ctx, client)
+}
+
+func TestDatasourcesTools(t *testing.T) {
+	t.Run("list datasources", func(t *testing.T) {
+		ctx := newTestContext()
+		result, err := listDatasources(ctx, ListDatasourcesParams{})
+		require.NoError(t, err)
+		// Six datasources are provisioned in the test environment (Prometheus, Prometheus Demo, Loki, Pyroscope, Tempo, and Tempo Secondary).
+		assert.Len(t, result, 6)
+	})
+
+	t.Run("list datasources for type", func(t *testing.T) {
+		ctx := newTestContext()
+		result, err := listDatasources(ctx, ListDatasourcesParams{Type: "Prometheus"})
+		require.NoError(t, err)
+		// Only two Prometheus datasources are provisioned in the test environment.
+		assert.Len(t, result, 2)
+	})
+
+	t.Run("get datasource by uid", func(t *testing.T) {
+		ctx := newTestContext()
+		result, err := getDatasourceByUID(ctx, GetDatasourceByUIDParams{
+			UID: "prometheus",
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "Prometheus", result.Name)
+	})
+
+	t.Run("get datasource by uid - not found", func(t *testing.T) {
+		ctx := newTestContext()
+		result, err := getDatasourceByUID(ctx, GetDatasourceByUIDParams{
+			UID: "non-existent-datasource",
+		})
+		require.Error(t, err)
+		require.Nil(t, result)
+		assert.Contains(t, err.Error(), "not found")
+	})
+
+	t.Run("get datasource by name", func(t *testing.T) {
+		ctx := newTestContext()
+		result, err := getDatasourceByName(ctx, GetDatasourceByNameParams{
+			Name: "Prometheus",
+		})
+		require.NoError(t, err)
+		assert.Equal(t, "Prometheus", result.Name)
+	})
+}

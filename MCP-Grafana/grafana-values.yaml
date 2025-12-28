@@ -1,0 +1,17 @@
+adminUser: admin
+adminPassword: admin123
+
+service:
+  type: NodePort
+  port: 80
+  nodePort: 30093
+
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+      - name: Prometheus
+        type: prometheus
+        access: proxy
+        url: http://my-prometheus-server.grafana.svc.cluster.local
+        isDefault: true

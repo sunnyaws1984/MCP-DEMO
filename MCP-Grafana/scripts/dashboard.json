@@ -1,0 +1,85 @@
+{
+  "title": "Kubernetes Pod-Level Dashboard (grafana namespace)",
+  "uid": "a9X7LmQ2Vp",
+  "schemaVersion": 36,
+  "version": 2,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "graph",
+      "title": "CPU Usage % per Pod",
+      "id": 1,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(rate(container_cpu_usage_seconds_total{namespace=\"grafana\", pod!=\"\"}[2m])) by (pod) * 100",
+          "legendFormat": "{{pod}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 6 }
+    },
+    {
+      "type": "graph",
+      "title": "Memory Usage per Pod (MB)",
+      "id": 2,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(container_memory_usage_bytes{namespace=\"grafana\", pod!=\"\"}) by (pod) / 1024 / 1024",
+          "legendFormat": "{{pod}}"
+        }
+      ],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 6 }
+    },
+    {
+      "type": "stat",
+      "title": "Total Memory Usage (MB)",
+      "id": 3,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(container_memory_usage_bytes{namespace=\"grafana\"}) / 1024 / 1024"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 6, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Pod Uptime (Minutes)",
+      "id": 4,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "(time() - kube_pod_start_time{namespace=\"grafana\"}) / 60",
+          "legendFormat": "{{pod}}"
+        }
+      ],
+      "gridPos": { "x": 6, "y": 6, "w": 12, "h": 6 }
+    },
+    {
+      "type": "stat",
+      "title": "Running Pods Count",
+      "id": 5,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "count(kube_pod_status_phase{namespace=\"grafana\", phase=\"Running\"} == 1)"
+        }
+      ],
+      "gridPos": { "x": 18, "y": 6, "w": 6, "h": 4 }
+    },
+    {
+      "type": "graph",
+      "title": "Pod Restarts",
+      "id": 6,
+      "datasource": "Prometheus",
+      "targets": [
+        {
+          "expr": "sum(kube_pod_container_status_restarts_total{namespace=\"grafana\"}) by (pod)",
+          "legendFormat": "{{pod}}"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 6 }
+    }
+  ]
+}

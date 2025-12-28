@@ -1,0 +1,61 @@
+services:
+  grafana:
+    image: grafana/grafana@sha256:35c41e0fd0295f5d0ee5db7e780cf33506abfaf47686196f825364889dee878b
+    environment:
+      GF_AUTH_ANONYMOUS_ENABLED: "false"
+      GF_LOG_LEVEL: debug
+      GF_SERVER_ROUTER_LOGGING: "true"
+    ports:
+      - 3000:3000/tcp
+    volumes:
+      - ./testdata/provisioning:/etc/grafana/provisioning
+      - ./testdata/dashboards:/var/lib/grafana/dashboards
+
+  prometheus:
+    image: prom/prometheus@sha256:ff7e389acbe064a4823212a500393d40a28a8f362e4b05cbf6742a9a3ef736b2
+    ports:
+      - "9090:9090"
+    entrypoint: /etc/prometheus/entrypoint.sh
+    volumes:
+      - ./testdata/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./testdata/prometheus-seed.yml:/etc/prometheus/prometheus-seed.yml
+      - ./testdata/prometheus-entrypoint.sh:/etc/prometheus/entrypoint.sh
+
+  loki:
+    image: grafana/loki:2.9.15@sha256:2fde6baaa4743a6870acb9ab5f15633de35adced3c0e3d61effd2a5f1008f1c3
+    ports:
+      - "3100:3100"
+    command: -config.file=/etc/loki/loki-config.yml
+    volumes:
+      - ./testdata/loki-config.yml:/etc/loki/loki-config.yml
+
+  promtail:
+    image: grafana/promtail:2.9.15@sha256:466ba2fac4448ed2dc509b267995a3c13511d69f6bba01800ca7b38d9953f899
+    volumes:
+      - ./testdata/promtail-config.yml:/etc/promtail/config.yml
+      - /var/log:/var/log
+      - /var/run/docker.sock:/var/run/docker.sock
+    command: -config.file=/etc/promtail/config.yml
+    depends_on:
+      - loki
+
+  pyroscope:
+    image: grafana/pyroscope:1.13.4@sha256:7e8f1911cbe9353f5c2433b81ff494d5c728c773e76ae9e886d2c009b0a28ada
+    ports:
+      - 4040:4040
+
+  tempo:
+    image: grafana/tempo:2.9.0-rc.0@sha256:5517ee34d335dedb9ad43028bd8f72edd0bb98b744ea5847a7572755d93d9866
+    command: ["-config.file=/etc/tempo/tempo-config.yaml"]
+    volumes:
+      - ./testdata/tempo-config.yaml:/etc/tempo/tempo-config.yaml
+    ports:
+      - "3200:3200" # tempo
+
+  tempo2:
+    image: grafana/tempo:2.9.0-rc.0@sha256:5517ee34d335dedb9ad43028bd8f72edd0bb98b744ea5847a7572755d93d9866
+    command: ["-config.file=/etc/tempo/tempo-config.yaml"]
+    volumes:
+      - ./testdata/tempo-config-2.yaml:/etc/tempo/tempo-config.yaml
+    ports:
+      - "3201:3201" # tempo instance 2
