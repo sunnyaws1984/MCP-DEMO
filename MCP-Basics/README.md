@@ -44,7 +44,9 @@ python app.py
 ### 3 Test the MCP Application
 ```bash
  npx @modelcontextprotocol/inspector
- https://nodejs.org/en/download - Download Node from here
+ Enter this URL:  http://localhost:8080/mcp
+ 
+ https://nodejs.org/en/download - Download Node from here if Node is missing
 
 ```
 
