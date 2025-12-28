@@ -128,7 +128,7 @@ The `mcp-grafana` binary supports various command-line flags for configuration:
 - `--debug`: Enable debug mode for detailed HTTP request/response logging
 
 ### How to Spin your own MCP Grafana
- 
+```bash
 You have several options to install `mcp-grafana`:
 
 1) git clone <REPO>
@@ -143,6 +143,7 @@ Get token <YOUR_TOKEN_HERE>
 6) Run below commands to get MCP Server up locally from the Image you created
 
 docker build -t mcp-grafana .
+
 docker run -d -p 8000:8000 \
   -e GRAFANA_URL=http://host.docker.internal:30093 \
   -e GRAFANA_SERVICE_ACCOUNT_TOKEN=<TOKEN>\
@@ -160,3 +161,4 @@ UID: PBFA97CFB590B2093
 expr: sum(rate(container_cpu_usage_seconds_total{namespace="grafana", pod!=""}[2m])) by (pod) * 100
 endtime: now-10m
 startime: now
+```
